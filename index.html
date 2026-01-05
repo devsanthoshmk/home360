@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description"
+        content="Experience a stunning 3D virtual home tour. Explore beautiful rooms with 360° panoramic views in this modern real estate showcase.">
+    <meta name="keywords" content="virtual tour, 3D home tour, real estate, panorama, 360 view">
+    <meta name="author" content="Home Tour Demo">
+    <meta name="theme-color" content="#0f172a">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Luxury Home Virtual Tour">
+    <meta property="og:description" content="Experience a stunning 3D virtual home tour with 360° panoramic views.">
+
+    <title>Luxury Home Virtual Tour | 3D Experience</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Pannellum CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
+            color: #fff;
+        }
+
+        /* Pannellum container */
+        #panorama-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #panorama {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Custom Pannellum hotspot styling */
+        .pnlm-hotspot {
+            width: 50px !important;
+            height: 50px !important;
+        }
+
+        .custom-hotspot {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5),
+                0 0 0 0 rgba(99, 102, 241, 0.4);
+            animation: hotspot-pulse 2s infinite;
+            transition: all 0.3s ease;
+        }
+
+        .custom-hotspot:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.7);
+        }
+
+        .custom-hotspot svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+        }
+
+        .hotspot-tooltip {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .hotspot-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(15, 23, 42, 0.95);
+        }
+
+        .custom-hotspot:hover .hotspot-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        @keyframes hotspot-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5),
+                    0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5),
+                    0 0 0 15px rgba(99, 102, 241, 0);
+            }
+        }
+
+        /* Hide default Pannellum controls we don't need */
+        .pnlm-controls-container {
+            display: none !important;
+        }
+
+        /* Scene transition overlay */
+        .scene-transition {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .scene-transition.active {
+            opacity: 1;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Room selector buttons */
+        .room-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .room-btn:hover::before,
+        .room-btn.active::before {
+            opacity: 1;
+        }
+
+        .room-btn.active {
+            border-color: #6366f1 !important;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2)) !important;
+        }
+
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Room indicator dot */
+        .room-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .room-dot.active {
+            background: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+        }
+
+        /* Mobile touch hint */
+        .touch-hint {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .custom-hotspot {
+                width: 44px;
+                height: 44px;
+            }
+
+            .custom-hotspot svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner mb-6"></div>
+        <h2 class="text-xl font-display font-medium text-white mb-2">Loading Sample Virtual Tour</h2>
+        <p class="text-sm text-gray-400">Preparing your experience...</p>
+    </div>
+
+    <!-- Scene Transition Overlay -->
+    <div id="scene-transition" class="scene-transition"></div>
+
+    <!-- Main Container -->
+    <div id="panorama-container">
+        <!-- Pannellum Viewer -->
+        <div id="panorama"></div>
+
+        <!-- Top Header Bar -->
+        <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 animate-fade-in">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- Logo / Brand -->
+                <div class="glass rounded-xl px-4 py-2.5 md:px-6 md:py-3">
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <div
+                            class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-tour-primary to-tour-secondary flex items-center justify-center">
+                            <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-sm md:text-base font-display font-semibold text-white">WCFF Samples</h1>
+                            <p class="text-xs text-gray-400 hidden sm:block">Virtual Tour Experience</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Room Indicator -->
+                <div id="current-room-badge" class="glass rounded-xl px-4 py-2.5 md:px-6 md:py-3">
+                    <div class="flex items-center gap-3">
+                        <div class="room-dot active"></div>
+                        <span id="current-room-name" class="text-sm md:text-base font-medium text-white">Living
+                            Room</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Room Navigation Panel -->
+        <nav id="room-nav" class="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 animate-slide-up">
+            <div class="max-w-4xl mx-auto">
+                <div class="glass rounded-2xl p-3 md:p-4">
+                    <!-- Navigation Header -->
+                    <div class="flex items-center justify-between mb-3 px-2">
+                        <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">Explore Rooms</span>
+                        <span id="room-counter" class="text-xs text-gray-500">1 of 4</span>
+                    </div>
+
+                    <!-- Room Buttons -->
+                    <div id="room-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                        <!-- Room buttons will be dynamically generated -->
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Controls Panel (Desktop) -->
+        <div id="controls-panel"
+            class="fixed left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-2">
+            <button id="btn-zoom-in"
+                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                title="Zoom In">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+                </svg>
+            </button>
+            <button id="btn-zoom-out"
+                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                title="Zoom Out">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6"></path>
+                </svg>
+            </button>
+            <button id="btn-fullscreen"
+                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                title="Fullscreen">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Touch Hint (shows briefly on first load) -->
+        <div id="mobile-hint"
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 md:hidden pointer-events-none opacity-0 transition-opacity duration-500">
+            <div class="glass rounded-2xl px-6 py-4 text-center">
+                <div class="touch-hint mb-3">
+                    <svg class="w-10 h-10 mx-auto text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11">
+                        </path>
+                    </svg>
+                </div>
+                <p class="text-sm text-white/80">Drag to look around</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pannellum JS -->
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+    <!-- Main Application Script -->
+    <script type="module" src="/src/tour.js"></script>
+</body>
+
+</html>
