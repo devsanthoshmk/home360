@@ -33,6 +33,9 @@
         #panorama-container {
             width: 100%;
             height: 100vh;
+            /* Fallback */
+            height: 100dvh;
+            /* Mobile browser friendly */
             position: relative;
         }
 
@@ -333,7 +336,7 @@
                     </div>
 
                     <!-- Room Buttons -->
-                    <div id="room-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                    <div id="room-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
                         <!-- Room buttons will be dynamically generated -->
                     </div>
                 </div>

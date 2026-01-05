@@ -458,7 +458,7 @@ function renderRoomButtons() {
             <div class="flex items-center gap-3">
                 <div class="room-dot bg-white/30 flex-shrink-0" data-scene="${scene.id}"></div>
                 <div class="min-w-0">
-                    <span class="block text-sm md:text-base font-medium text-white truncate">${scene.title}</span>
+                    <span class="block text-sm md:text-base font-medium text-white line-clamp-2 leading-tight">${scene.title}</span>
                     <span class="block text-xs text-gray-400 truncate hidden sm:block">${scene.description.slice(0, 35)}...</span>
                 </div>
             </div>
