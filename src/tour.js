@@ -8,6 +8,8 @@
  * @version 1.0.0
  */
 
+import './style.css';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -33,7 +35,7 @@ const SCENE_CONFIG = {
         title: 'Living Room',
         description: 'Bright, modern living space with large windows',
         image: '/panos/living-room.jpg',
-        
+
         // Initial camera position when entering this scene
         // These values position the view to highlight the main features
         initialView: {
@@ -41,7 +43,7 @@ const SCENE_CONFIG = {
             pitch: 0,         // Eye level
             hfov: 110         // Wide field of view for spacious feel
         },
-        
+
         // Navigation hotspots linking to other rooms
         // Positioned based on logical room layout
         hotspots: [
@@ -58,24 +60,24 @@ const SCENE_CONFIG = {
                 label: 'Lounge'
             }
         ],
-        
+
         // Accent color for UI elements (matches room aesthetic)
         accentColor: '#6366f1'
     },
-    
+
     // Open Living & Kitchen - Connected open-plan space
     'open-living-kitchen': {
         id: 'open-living-kitchen',
         title: 'Open Living & Kitchen',
         description: 'Spacious open-plan living and kitchen area',
         image: '/panos/open-living-kitchen.jpg',
-        
+
         initialView: {
             yaw: 45,          // Angled to show both living and kitchen areas
             pitch: 0,
             hfov: 110
         },
-        
+
         hotspots: [
             {
                 targetScene: 'living-room',
@@ -84,23 +86,23 @@ const SCENE_CONFIG = {
                 label: 'Living Room'
             }
         ],
-        
+
         accentColor: '#8b5cf6'
     },
-    
+
     // Lounge - Luxury circular sitting area
     'lounge': {
         id: 'lounge',
         title: 'Lounge',
         description: 'Luxury circular sitting area with architectural design',
         image: '/panos/lounge.jpg',
-        
+
         initialView: {
             yaw: 0,           // Face the central seating
             pitch: -5,        // Slight downward angle for the curved sofa
             hfov: 105         // Slightly narrower for intimate feel
         },
-        
+
         hotspots: [
             {
                 targetScene: 'living-room',
@@ -115,23 +117,23 @@ const SCENE_CONFIG = {
                 label: 'Music Room'
             }
         ],
-        
+
         accentColor: '#d946ef'
     },
-    
+
     // Music Room - Cozy study with instruments
     'music-room': {
         id: 'music-room',
         title: 'Music Room',
         description: 'Cozy music room with piano and guitar, featuring wood ceiling',
         image: '/panos/music-room.jpg',
-        
+
         initialView: {
             yaw: -30,         // Angled to show piano and fireplace
             pitch: 5,         // Slightly up to show wood ceiling
             hfov: 100         // Narrower FOV for cozy feeling
         },
-        
+
         hotspots: [
             {
                 targetScene: 'lounge',
@@ -140,7 +142,7 @@ const SCENE_CONFIG = {
                 label: 'Lounge'
             }
         ],
-        
+
         accentColor: '#f59e0b'
     }
 };
@@ -153,11 +155,11 @@ const VIEWER_SETTINGS = {
     // Pitch limits prevent viewing distorted ceiling/floor areas
     minPitch: -50,            // Maximum downward angle
     maxPitch: 50,             // Maximum upward angle
-    
+
     // Field of view constraints
     minHfov: 50,              // Maximum zoom in
     maxHfov: 120,             // Maximum zoom out (wide angle)
-    
+
     // Interaction settings
     autoLoad: true,           // Load panorama immediately
     compass: false,           // Hide compass (clean UI preference)
@@ -165,13 +167,13 @@ const VIEWER_SETTINGS = {
     mouseZoom: true,          // Enable scroll wheel zoom
     keyboardZoom: true,       // Enable +/- keys for zoom
     friction: 0.15,           // Smooth deceleration after mouse drag
-    
+
     // Performance settings
     hfov: 110,                // Default horizontal field of view
-    
+
     // Touch/mobile settings
     touchPanSpeedCoeffFactor: 0.5,  // Slower pan on touch for precision
-    
+
     // Animation settings for auto-rotate (disabled by default)
     autoRotate: 0,            // Degrees per second (0 = disabled)
     autoRotateInactivityDelay: 5000  // ms before auto-rotate starts
@@ -279,29 +281,29 @@ function cacheElements() {
 function initializeViewer() {
     const scene = SCENE_CONFIG[DEFAULT_SCENE];
     state.currentScene = DEFAULT_SCENE;
-    
+
     state.viewer = pannellum.viewer('panorama', {
         type: 'equirectangular',
         panorama: scene.image,
-        
+
         // Apply initial view settings
         yaw: scene.initialView.yaw,
         pitch: scene.initialView.pitch,
         hfov: scene.initialView.hfov,
-        
+
         // Apply global settings
         ...VIEWER_SETTINGS,
-        
+
         // Hotspots for this scene
         hotSpots: createHotspots(scene.hotspots)
     });
-    
+
     // Event: Panorama loaded
     state.viewer.on('load', () => {
         hideLoadingScreen();
         updateUI();
     });
-    
+
     // Event: Scene rendering error
     state.viewer.on('error', (error) => {
         console.error('Pannellum error:', error);
@@ -324,25 +326,25 @@ async function navigateToScene(sceneId) {
     if (!SCENE_CONFIG[sceneId] || sceneId === state.currentScene) {
         return;
     }
-    
+
     // Prevent rapid clicking during transitions
     if (state.isTransitioning) {
         return;
     }
-    
+
     state.isTransitioning = true;
     const scene = SCENE_CONFIG[sceneId];
-    
+
     // Start fade-out transition
     elements.sceneTransition.classList.add('active');
-    
+
     // Wait for fade-out
     await delay(TRANSITION_DURATION);
-    
+
     // Load the new scene
     state.viewer.destroy();
     state.currentScene = sceneId;
-    
+
     state.viewer = pannellum.viewer('panorama', {
         type: 'equirectangular',
         panorama: scene.image,
@@ -352,7 +354,7 @@ async function navigateToScene(sceneId) {
         ...VIEWER_SETTINGS,
         hotSpots: createHotspots(scene.hotspots)
     });
-    
+
     // Wait for scene to load
     state.viewer.on('load', () => {
         // Fade in
@@ -360,7 +362,7 @@ async function navigateToScene(sceneId) {
         state.isTransitioning = false;
         updateUI();
     });
-    
+
     state.viewer.on('error', () => {
         elements.sceneTransition.classList.remove('active');
         state.isTransitioning = false;
@@ -403,7 +405,7 @@ function createHotspots(hotspots) {
 function createCustomHotspot(hotSpotDiv, args) {
     // Clear default content
     hotSpotDiv.classList.add('custom-hotspot');
-    
+
     // Add navigation arrow icon
     hotSpotDiv.innerHTML = `
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,13 +428,13 @@ function updateUI() {
     const scene = SCENE_CONFIG[state.currentScene];
     const sceneIds = Object.keys(SCENE_CONFIG);
     const currentIndex = sceneIds.indexOf(state.currentScene) + 1;
-    
+
     // Update room name badge
     elements.currentRoomName.textContent = scene.title;
-    
+
     // Update room counter
     elements.roomCounter.textContent = `${currentIndex} of ${sceneIds.length}`;
-    
+
     // Update room button active states
     updateRoomButtonStates();
 }
@@ -443,7 +445,7 @@ function updateUI() {
  */
 function renderRoomButtons() {
     const scenes = Object.values(SCENE_CONFIG);
-    
+
     elements.roomButtons.innerHTML = scenes.map((scene, index) => `
         <button 
             id="room-btn-${scene.id}"
@@ -467,13 +469,13 @@ function renderRoomButtons() {
             </div>
         </button>
     `).join('');
-    
+
     // Add click listeners to room buttons
     scenes.forEach(scene => {
         const btn = document.getElementById(`room-btn-${scene.id}`);
         btn.addEventListener('click', () => navigateToScene(scene.id));
     });
-    
+
     // Set initial active state
     updateRoomButtonStates();
 }
@@ -485,12 +487,12 @@ function renderRoomButtons() {
 function updateRoomButtonStates() {
     const buttons = elements.roomButtons.querySelectorAll('.room-btn');
     const dots = elements.roomButtons.querySelectorAll('.room-dot');
-    
+
     buttons.forEach(btn => {
         const isActive = btn.dataset.scene === state.currentScene;
         btn.classList.toggle('active', isActive);
     });
-    
+
     dots.forEach(dot => {
         const isActive = dot.dataset.scene === state.currentScene;
         dot.classList.toggle('active', isActive);
@@ -503,7 +505,7 @@ function updateRoomButtonStates() {
  */
 function hideLoadingScreen() {
     elements.loadingScreen.classList.add('hidden');
-    
+
     // Remove from DOM after animation
     setTimeout(() => {
         elements.loadingScreen.style.display = 'none';
@@ -516,14 +518,14 @@ function hideLoadingScreen() {
  */
 function showMobileHint() {
     if (!state.isFirstLoad) return;
-    
+
     // Only show on touch devices
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
+
     if (isTouchDevice && window.innerWidth < 768) {
         setTimeout(() => {
             elements.mobileHint.style.opacity = '1';
-            
+
             setTimeout(() => {
                 elements.mobileHint.style.opacity = '0';
                 state.isFirstLoad = false;
@@ -546,18 +548,18 @@ function setupEventListeners() {
         const currentHfov = state.viewer.getHfov();
         state.viewer.setHfov(Math.max(currentHfov - 10, VIEWER_SETTINGS.minHfov));
     });
-    
+
     elements.btnZoomOut?.addEventListener('click', () => {
         const currentHfov = state.viewer.getHfov();
         state.viewer.setHfov(Math.min(currentHfov + 10, VIEWER_SETTINGS.maxHfov));
     });
-    
+
     // Fullscreen toggle
     elements.btnFullscreen?.addEventListener('click', toggleFullscreen);
-    
+
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
-    
+
     // Handle window resize
     window.addEventListener('resize', debounce(handleResize, 250));
 
@@ -577,27 +579,27 @@ function setupEventListeners() {
 function handleKeyboardNavigation(event) {
     const sceneIds = Object.keys(SCENE_CONFIG);
     const currentIndex = sceneIds.indexOf(state.currentScene);
-    
-    switch(event.key) {
+
+    switch (event.key) {
         case 'ArrowRight':
         case 'n':
             // Navigate to next room
             const nextIndex = (currentIndex + 1) % sceneIds.length;
             navigateToScene(sceneIds[nextIndex]);
             break;
-            
+
         case 'ArrowLeft':
         case 'p':
             // Navigate to previous room
             const prevIndex = (currentIndex - 1 + sceneIds.length) % sceneIds.length;
             navigateToScene(sceneIds[prevIndex]);
             break;
-            
+
         case 'f':
             // Toggle fullscreen
             toggleFullscreen();
             break;
-            
+
         case '1':
         case '2':
         case '3':
@@ -618,9 +620,9 @@ function handleKeyboardNavigation(event) {
 function handleFullscreenChange() {
     const doc = window.document;
     const isFullscreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
-    
+
     const uiElements = [elements.header, elements.roomNav];
-    
+
     uiElements.forEach(el => {
         if (el) {
             if (isFullscreen) {
@@ -662,7 +664,7 @@ function toggleFullscreen() {
 function handleResize() {
     // Pannellum handles resize automatically, but we can adjust settings
     const isMobile = window.innerWidth < 768;
-    
+
     // Optionally adjust FOV for mobile
     if (state.viewer && state.currentScene) {
         const scene = SCENE_CONFIG[state.currentScene];

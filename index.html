@@ -26,28 +26,9 @@
 
     <!-- Pannellum CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
-
+    <link rel="stylesheet" href="./src/style.css">
     <!-- Custom Styles -->
     <style>
-        /* Base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: #0f172a;
-            color: #fff;
-        }
-
         /* Pannellum container */
         #panorama-container {
             width: 100%;
@@ -220,14 +201,6 @@
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2)) !important;
         }
 
-        /* Glassmorphism effect */
-        .glass {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
         /* Room indicator dot */
         .room-dot {
             width: 8px;
@@ -298,11 +271,11 @@
     </style>
 </head>
 
-<body>
+<body class="font-sans bg-tour-dark text-white antialiased overflow-hidden">
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loading-spinner mb-6"></div>
-        <h2 class="text-xl font-display font-medium text-white mb-2">Loading Sample Virtual Tour</h2>
+        <h2 class="text-xl font-sans font-medium text-white mb-2">Loading Sample Virtual Tour</h2>
         <p class="text-sm text-gray-400">Preparing your experience...</p>
     </div>
 
@@ -318,7 +291,8 @@
         <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 animate-fade-in">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <!-- Logo / Brand -->
-                <div class="glass rounded-xl px-4 py-2.5 md:px-6 md:py-3">
+                <div
+                    class="bg-tour-card backdrop-blur-xl border border-white/10 rounded-xl px-4 py-2.5 md:px-6 md:py-3">
                     <div class="flex items-center gap-2 md:gap-3">
                         <div
                             class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-tour-primary to-tour-secondary flex items-center justify-center">
@@ -330,14 +304,15 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-sm md:text-base font-display font-semibold text-white">WCFF Samples</h1>
+                            <h1 class="text-sm md:text-base font-sans font-semibold text-white">WCFF Samples</h1>
                             <p class="text-xs text-gray-400 hidden sm:block">Virtual Tour Experience</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Current Room Indicator -->
-                <div id="current-room-badge" class="glass rounded-xl px-4 py-2.5 md:px-6 md:py-3">
+                <div id="current-room-badge"
+                    class="bg-tour-card backdrop-blur-xl border border-white/10 rounded-xl px-4 py-2.5 md:px-6 md:py-3">
                     <div class="flex items-center gap-3">
                         <div class="room-dot active"></div>
                         <span id="current-room-name" class="text-sm md:text-base font-medium text-white">Living
@@ -350,7 +325,7 @@
         <!-- Room Navigation Panel -->
         <nav id="room-nav" class="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 animate-slide-up">
             <div class="max-w-4xl mx-auto">
-                <div class="glass rounded-2xl p-3 md:p-4">
+                <div class="bg-tour-card backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4">
                     <!-- Navigation Header -->
                     <div class="flex items-center justify-between mb-3 px-2">
                         <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">Explore Rooms</span>
@@ -369,7 +344,7 @@
         <div id="controls-panel"
             class="fixed left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-2">
             <button id="btn-zoom-in"
-                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                class="bg-tour-card backdrop-blur-xl border border-white/10 w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
                 title="Zoom In">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -377,7 +352,7 @@
                 </svg>
             </button>
             <button id="btn-zoom-out"
-                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                class="bg-tour-card backdrop-blur-xl border border-white/10 w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
                 title="Zoom Out">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -385,7 +360,7 @@
                 </svg>
             </button>
             <button id="btn-fullscreen"
-                class="glass w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                class="bg-tour-card backdrop-blur-xl border border-white/10 w-12 h-12 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
                 title="Fullscreen">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -398,7 +373,7 @@
         <!-- Mobile Touch Hint (shows briefly on first load) -->
         <div id="mobile-hint"
             class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 md:hidden pointer-events-none opacity-0 transition-opacity duration-500">
-            <div class="glass rounded-2xl px-6 py-4 text-center">
+            <div class="bg-tour-card backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-4 text-center">
                 <div class="touch-hint mb-3">
                     <svg class="w-10 h-10 mx-auto text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
