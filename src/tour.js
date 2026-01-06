@@ -229,7 +229,11 @@ const elements = {
     btnFullscreen: null,
     header: null,
     roomNav: null,
-    controlsPanel: null
+    controlsPanel: null,
+    // Mobile fullscreen recommendation elements
+    fullscreenRecommendation: null,
+    btnEnterFullscreen: null,
+    btnDismissFullscreen: null
 };
 
 
@@ -246,6 +250,7 @@ function init() {
     renderRoomButtons();
     setupEventListeners();
     showMobileHint();
+    showFullscreenRecommendation();
 }
 
 if (document.readyState === 'loading') {
@@ -272,6 +277,10 @@ function cacheElements() {
     elements.header = document.getElementById('header');
     elements.roomNav = document.getElementById('room-nav');
     elements.controlsPanel = document.getElementById('controls-panel');
+    // Mobile fullscreen recommendation elements
+    elements.fullscreenRecommendation = document.getElementById('fullscreen-recommendation');
+    elements.btnEnterFullscreen = document.getElementById('btn-enter-fullscreen');
+    elements.btnDismissFullscreen = document.getElementById('btn-dismiss-fullscreen');
 }
 
 
@@ -535,6 +544,57 @@ function showMobileHint() {
 }
 
 
+/**
+ * Show fullscreen recommendation banner on mobile devices.
+ * Only shown on first load for touch devices.
+ */
+function showFullscreenRecommendation() {
+    // Only show on mobile/touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobile = window.innerWidth < 768;
+
+    if (!isTouchDevice || !isMobile) {
+        return;
+    }
+
+    // Check if user has previously dismissed the recommendation
+    const dismissed = sessionStorage.getItem('fullscreenRecommendationDismissed');
+    if (dismissed === 'true') {
+        return;
+    }
+
+    // Show the recommendation banner after a short delay
+    setTimeout(() => {
+        if (elements.fullscreenRecommendation) {
+            elements.fullscreenRecommendation.classList.add('show');
+        }
+    }, 2500); // Show after mobile hint disappears
+
+    // Set up event listeners for fullscreen recommendation buttons
+    elements.btnEnterFullscreen?.addEventListener('click', () => {
+        hideFullscreenRecommendation();
+        toggleFullscreen();
+    });
+
+    elements.btnDismissFullscreen?.addEventListener('click', () => {
+        hideFullscreenRecommendation();
+        // Remember user's choice for this session
+        sessionStorage.setItem('fullscreenRecommendationDismissed', 'true');
+    });
+}
+
+
+/**
+ * Hide the fullscreen recommendation banner.
+ */
+function hideFullscreenRecommendation() {
+    if (elements.fullscreenRecommendation) {
+        elements.fullscreenRecommendation.classList.remove('show');
+        elements.fullscreenRecommendation.classList.add('hide');
+    }
+}
+
+
 // ============================================================================
 // EVENT LISTENERS
 // ============================================================================
@@ -615,7 +675,7 @@ function handleKeyboardNavigation(event) {
 
 
 /**
- * Handle fullscreen change events to toggle UI visibility.
+ * Handle fullscreen change events to toggle UI visibility and screen orientation.
  */
 function handleFullscreenChange() {
     const doc = window.document;
@@ -632,6 +692,52 @@ function handleFullscreenChange() {
             }
         }
     });
+
+    // Handle screen orientation on mobile
+    handleScreenOrientation(isFullscreen);
+
+    // Hide fullscreen recommendation banner when in fullscreen
+    if (elements.fullscreenRecommendation) {
+        if (isFullscreen) {
+            elements.fullscreenRecommendation.classList.remove('show');
+            elements.fullscreenRecommendation.classList.add('hide');
+        }
+    }
+}
+
+
+/**
+ * Handle screen orientation lock/unlock for mobile devices.
+ * Locks to landscape when entering fullscreen, unlocks on exit.
+ * 
+ * @param {boolean} isFullscreen - Whether currently in fullscreen mode
+ */
+async function handleScreenOrientation(isFullscreen) {
+    // Check if Screen Orientation API is available
+    if (!screen.orientation || !screen.orientation.lock) {
+        return;
+    }
+
+    // Only apply on mobile devices
+    const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+    if (!isMobile) {
+        return;
+    }
+
+    try {
+        if (isFullscreen) {
+            // Lock to landscape when entering fullscreen
+            await screen.orientation.lock('landscape');
+            console.log('Screen locked to landscape mode');
+        } else {
+            // Unlock orientation when exiting fullscreen
+            screen.orientation.unlock();
+            console.log('Screen orientation unlocked');
+        }
+    } catch (error) {
+        // Orientation lock may fail on some devices or browsers
+        console.log('Screen orientation lock not supported:', error.message);
+    }
 }
 
 
